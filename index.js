@@ -1,5 +1,5 @@
 /**
- * Loads images from Flickr
+ * Loads images from an API
  *
  * See https://github.com/MostlyAdequate/mostly-adequate-guide/blob/master/ch06.md#a-flickr-of-functional-programming
  */
@@ -19,7 +19,8 @@ const query = (tag) => `${tag}/images`;
 const url = (tag) => `https://${host}${path}${query(tag)}`;
 
 /**
- * The impure functions separated into a special name space
+ * The impure functions
+ * - Separated into a special name space
  */
 const Impure = {
   /**
@@ -46,12 +47,36 @@ const Impure = {
  * - The final function will be the app itself
  * - All functions are point-free, aka without data
  */
+
+/**
+ * 6. Returns a HTML image tag.
+ */
 const image = (x) => `<img src="${x}"/>`;
+
+/**
+ * 5. Wraps each `message` into an `image`
+ * 4. Takes the `message` prop from the response
+ */
 const images = compose(map(image), prop("message"));
+
+/**
+ * 3. Renders the images to the console.
+ * - This can be replaced by a HTML renderer.
+ */
 const render = compose(Impure.toConsole("Images:"), images);
+
+/**
+ * The app:
+ *
+ * 3. Renders the results
+ * 2. Transform the result to JSON
+ * 1. Loads the url
+ *
+ */
 const app = compose(Impure.getJSON(render), url);
 
 /**
- * Runs the app with data
+ * 0. Runs the app with data
+ * - `url` will get the `hound` prop
  */
 app("hound");
