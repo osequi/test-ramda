@@ -21,35 +21,13 @@ const toNode = (node) => `${toID(node.id)} ${toLabel(node.label)}`;
 const toEdge = (node1, node2) => `${toID(node1.id)} -> ${toID(node2.id)}`;
 
 const toNodesWithEdge = R.curry((node1, node2) => {
-  console.log("node1:", node1);
-  console.log("node2:", node2);
   return `${toNode(node1)} ${toEdge(node1, node2)} ${toNode(node2)}`;
 });
 
-const toChildren = R.curry((children, main) =>
-  R.compose(R.map(toNodesWithEdge(main)), children)
-);
+const toChildren = (main) =>
+  R.map(toNodesWithEdge(main), R.pathOr([], childrenPath, main));
 
-const app = R.compose(
-  Impure.toConsole("result:"),
-  toChildren([
-    {
-      id: "ui.structure",
-      label: "Structure",
-      edges: {},
-    },
-    {
-      id: "ui.presentation",
-      label: "Presentation",
-      edges: {},
-    },
-    {
-      id: "ui.behavior",
-      label: "Behavior",
-      edges: {},
-    },
-  ])
-);
+const app = R.compose(Impure.toConsole("result:"), R.join(" "), toChildren);
 
 console.log({ node1 });
 app(node1);
