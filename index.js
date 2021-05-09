@@ -13,21 +13,38 @@ const Impure = {
 
 const childrenPath = ["edges", "children"];
 const siblingsPath = ["edges", "siblings"];
-const childrenNodes = R.pathOr([], childrenPath);
 
 const toLabel = (label) => `[label="${label}"]`;
 const toID = (id) => id?.replaceAll(".", "_");
 const toNode = (node) => `${toID(node.id)} ${toLabel(node.label)}`;
-const toEdge = (node1, node2) => `${toID(node1.id)} -> ${toID(node2.id)}`;
+const toEdge = (node1, node2, arrow) =>
+  `${toID(node1.id)} ${arrow} ${toID(node2.id)}`;
 
-const toNodesWithEdge = R.curry((node1, node2) => {
-  return `${toNode(node1)} ${toEdge(node1, node2)} ${toNode(node2)}`;
+const toChildrenNodes = R.curry((node1, arrow, node2) => {
+  return `${toNode(node1)} ${toEdge(node1, node2, arrow)} ${toNode(node2)}`;
 });
 
 const toChildren = (main) =>
-  R.map(toNodesWithEdge(main), R.pathOr([], childrenPath, main));
+  R.map(toChildrenNodes(main, "->"), R.pathOr([], childrenPath, main));
 
-const app = R.compose(Impure.toConsole("result:"), R.join(" "), toChildren);
+const toSiblingNodes = (node) => {
+  return toChildrenNodes(R.head(R.pathOr([], siblingsPath, node)), "--", node);
+};
 
-console.log({ node1 });
-app(node1);
+const toSiblings = (main) =>
+  R.map(toSiblingNodes, R.pathOr([], siblingsPath, main));
+
+const children = R.compose(
+  Impure.toConsole("result:"),
+  R.join(" "),
+  toChildren
+);
+
+const siblings = R.compose(
+  Impure.toConsole("result:"),
+  R.join(" "),
+  toSiblings
+);
+
+siblings(node2);
+children(node1);
