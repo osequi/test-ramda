@@ -1,47 +1,55 @@
-/**
- * FP with Ramda
- * See https://tutorials.paqmind.com/ramda-I/challenges/0.1.qzn
- */
-
+const { node1, node2 } = require("./data");
 const R = require("ramda");
 
-// Ch3
-// With the same args the same results are returned
+/**
+ * The impure functions separated into a special name space
+ */
+const Impure = {
+  toConsole: R.curry((text, x) => {
+    console.log(text, x);
+    return x;
+  }),
+};
 
-let add = R.curry((x, y) => x + y);
-// add(x)(y) => y => x + y
+const childrenPath = ["edges", "children"];
+const siblingsPath = ["edges", "siblings"];
+const childrenNodes = R.pathOr([], childrenPath);
 
-add(1, 2);
-// With the same args the same results are returned
+const toLabel = (label) => `[label="${label}"]`;
+const toID = (id) => id?.replaceAll(".", "_");
+const toNode = (node) => `${toID(node.id)} ${toLabel(node.label)}`;
+const toEdge = (node1, node2) => `${toID(node1.id)} -> ${toID(node2.id)}`;
 
-add(2)(1);
-// x => y => x + y
-// 2 => y => 2 + y
-// 1 => 2 + 1
+const toNodesWithEdge = R.curry((node1, node2) => {
+  console.log("node1:", node1);
+  console.log("node2:", node2);
+  return `${toNode(node1)} ${toEdge(node1, node2)} ${toNode(node2)}`;
+});
 
-// Ch2
-// Watch the syntax !!!
+const toChildren = R.curry((children, main) =>
+  R.compose(R.map(toNodesWithEdge(main)), children)
+);
 
-let add = (x, y) => x + y;
-R.partial(add, 1)(2);
-// Err, [] needed
+const app = R.compose(
+  Impure.toConsole("result:"),
+  toChildren([
+    {
+      id: "ui.structure",
+      label: "Structure",
+      edges: {},
+    },
+    {
+      id: "ui.presentation",
+      label: "Presentation",
+      edges: {},
+    },
+    {
+      id: "ui.behavior",
+      label: "Behavior",
+      edges: {},
+    },
+  ])
+);
 
-R.partial(add, 1, 2);
-// Err, [] needed
-
-R.partial(add, [])(1, 2);
-// add2 = add
-// 1 + 2
-
-R.partial(add, [1])(2);
-// add2 = y => 1 + y
-// 1 + 2
-
-R.partial(add, [1, 2])();
-// add2 = () => 1 + 2
-
-R.partial(add, [1, 2, 3])();
-// Drops the extra arg
-// add2 = () => 1 + 2
-
-// Ch1: online
+console.log({ node1 });
+app(node1);
