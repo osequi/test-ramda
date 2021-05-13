@@ -11,13 +11,26 @@ const Impure = {
   }),
 };
 
+// Works not
 const takeProp = R.curry((propName, props) => {
   Impure.toConsole("takeProp:", R.prop(propName));
   return props;
 });
 
 // Works
+const takeProp2 = R.curry((propName, props) => {
+  Impure.toConsole("takeProp:", R.prop(propName, props));
+  return props;
+});
+
+// Works
 const destructure1 = R.compose(Impure.toConsole("result1:"), R.prop("node1"));
+
+// Works
+const destructure10 = R.compose(
+  Impure.toConsole("result10:"),
+  takeProp2("node1")
+);
 
 /**
  * Works not really
@@ -99,4 +112,5 @@ const nodes = { node1, node2 };
 //destructure6(nodes);
 //destructure7(nodes);
 //destructure8(nodes);
-destructure9(nodes);
+//destructure9(nodes);
+destructure10(nodes);
