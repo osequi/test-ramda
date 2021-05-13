@@ -11,40 +11,92 @@ const Impure = {
   }),
 };
 
-const childrenPath = ["edges", "children"];
-const siblingsPath = ["edges", "siblings"];
-
-const toLabel = (label) => `[label="${label}"]`;
-const toID = (id) => id?.replaceAll(".", "_");
-const toNode = (node) => `${toID(node.id)} ${toLabel(node.label)}`;
-const toEdge = (node1, node2, arrow) =>
-  `${toID(node1.id)} ${arrow} ${toID(node2.id)}`;
-
-const toChildrenNodes = R.curry((node1, arrow, node2) => {
-  return `${toNode(node1)} ${toEdge(node1, node2, arrow)} ${toNode(node2)}`;
+const takeProp = R.curry((propName, props) => {
+  Impure.toConsole("takeProp:", R.prop(propName));
+  return props;
 });
 
-const toChildren = (main) =>
-  R.map(toChildrenNodes(main, "->"), R.pathOr([], childrenPath, main));
+// Works
+const destructure1 = R.compose(Impure.toConsole("result1:"), R.prop("node1"));
 
-const toSiblingNodes = (node) => {
-  return toChildrenNodes(R.head(R.pathOr([], siblingsPath, node)), "--", node);
-};
+/**
+ * Works not really
+ * node3: [Function: f1]
+takeProp: [Function: f1]
+result9: {
+  node1: { id: 'ui', label: 'User Interface', edges: { children: [Array] } },
+  node2: {
+    id: 'ui.web',
+    label: 'Web User Interface',
+    edges: { siblings: [Array] }
+  }
+}
 
-const toSiblings = (main) =>
-  R.map(toSiblingNodes, R.pathOr([], siblingsPath, main));
+ */
+const destructure9 = R.compose(Impure.toConsole("result9:"), takeProp("node1"));
 
-const children = R.compose(
-  Impure.toConsole("result:"),
-  R.join(" "),
-  toChildren
+// Works not: `node: [Function: f1]`
+const destructure2 = (node) => R.compose(Impure.toConsole("node2:", node));
+
+// Works not: `node: [Function: f1]`
+const destructure3 = (node) => Impure.toConsole("node3:", node);
+
+// Works not: `node: [Function: f1]`
+const destructure4 = (node) => console.log("node4:", node);
+
+// Works not: arity error
+/*
+const destructure5 = R.compose(
+  Impure.toConsole("result5:"),
+  R.prop("node1"),
+  destructure4(R.prop("node1"))
+);
+*/
+
+// Works not:
+// code: [Function: f1]
+// result6:
+const destructure6 = R.compose(
+  Impure.toConsole("result6:"),
+  R.prop("node1"),
+  destructure3(R.prop("node1"))
 );
 
-const siblings = R.compose(
-  Impure.toConsole("result:"),
-  R.join(" "),
-  toSiblings
+/**
+ * Works not really:
+ * 
+ * node3: [Function: f1]
+node3: {
+  id: 'ui',
+  label: 'User Interface',
+  edges: { children: [ [Object], [Object], [Object] ] }
+}
+result6: 
+ */
+const destructure7 = R.compose(
+  Impure.toConsole("result6:"),
+  R.prop("node1"),
+  destructure3,
+  R.prop("node1")
 );
 
-siblings(node2);
-children(node1);
+// Works not: arity error
+/*
+const destructure8 = R.compose(
+  Impure.toConsole("result6:"),
+  R.prop("node1"),
+  destructure2,
+  R.prop("node1")
+);
+*/
+
+const nodes = { node1, node2 };
+//destructure1(nodes);
+//destructure2(R.prop("node1"));
+//destructure3(R.prop("node1"));
+//destructure4(R.prop("node1"));
+//destructure5(nodes);
+//destructure6(nodes);
+//destructure7(nodes);
+//destructure8(nodes);
+destructure9(nodes);
